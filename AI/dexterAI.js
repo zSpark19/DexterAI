@@ -1,4 +1,4 @@
-import { getUserData, saveUserInteraction, detectFavoriteTopic } from './Bots/db.js';
+import { getUserData, saveUserInteraction, detectFavoriteTopic } from '../db.js';
 import OpenAI from 'openai';
 import fetch from 'node-fetch';
 import dotenv from 'dotenv';
