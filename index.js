@@ -1,6 +1,6 @@
 import { Client, GatewayIntentBits } from 'discord.js';
 import dotenv from 'dotenv';
-import { handleDexterIA } from 'file:///C://Users/mikel/BOTS/AI/dexterAI.js';
+import { handleDexterIA } from './AI/dexterAI.js';
 
 dotenv.config();
 
