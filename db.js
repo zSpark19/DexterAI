@@ -7,11 +7,7 @@ dotenv.config();
 
 // Configuración del pool de conexiones para PostgreSQL
 const pool = new Pool({
-  host: process.env.PGHOST,
-  port: process.env.PGPORT,
-  database: process.env.PGDATABASE,
-  user: process.env.PGUSER,
-  password: process.env.PGPASSWORD,
+  connectionString: process.env.DATABASE_URL,
   ssl: {
     rejectUnauthorized: false, // Necesario para conexiones seguras (Railway)
   },
@@ -33,20 +29,38 @@ const query = async (text, params) => {
 
 // Crear la tabla `user_data` si no existe
 export const initDb = async () => {
-  const queryText = `
-    CREATE TABLE IF NOT EXISTS user_data (
-      user_id TEXT PRIMARY KEY,          -- ID único del usuario
-      username TEXT,                     -- Nombre del usuario
-      interaction_count INTEGER DEFAULT 0, -- Número de interacciones
-      favorite_topic TEXT,               -- Tema favorito del usuario
-      last_interaction TIMESTAMP,        -- Fecha de la última interacción
-      favorite_game TEXT,                -- Juego favorito del usuario
-      mood TEXT,                         -- Último estado de ánimo detectado del usuario
-      special_notes TEXT                 -- Notas especiales sobre el usuario
-    );
-  `;
-  await query(queryText);
-  console.log('Base de datos inicializada correctamente.');
+  try {
+    // Verifica si la tabla ya existe
+    const tableExists = await query(`
+      SELECT EXISTS (
+        SELECT FROM information_schema.tables 
+        WHERE table_name = 'user_data'
+      );
+    `);
+
+    if (tableExists[0].exists) {
+      console.log('La tabla "user_data" ya existe.');
+    } else {
+      // Crear la tabla si no existe
+      const queryText = `
+        CREATE TABLE user_data (
+          user_id TEXT PRIMARY KEY,          -- ID único del usuario
+          username TEXT,                     -- Nombre del usuario
+          interaction_count INTEGER DEFAULT 0, -- Número de interacciones
+          favorite_topic TEXT,               -- Tema favorito del usuario
+          last_interaction TIMESTAMP,        -- Fecha de la última interacción
+          favorite_game TEXT,                -- Juego favorito del usuario
+          mood TEXT,                         -- Último estado de ánimo detectado del usuario
+          special_notes TEXT                 -- Notas especiales sobre el usuario
+        );
+      `;
+      await query(queryText);
+      console.log('Tabla "user_data" creada correctamente.');
+    }
+  } catch (err) {
+    console.error('Error inicializando la base de datos:', err.stack);
+    throw err;
+  }
 };
 
 // Guardar o actualizar datos del usuario

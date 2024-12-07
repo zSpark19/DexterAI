@@ -1,7 +1,7 @@
 import { Client, GatewayIntentBits } from 'discord.js';
 import dotenv from 'dotenv';
 import { handleDexterIA } from './AI/dexterAI.js';
-
+import { initDb } from './db.js';
 dotenv.config();
 
 // Configurar cliente de Discord
@@ -12,6 +12,16 @@ const client = new Client({
     GatewayIntentBits.MessageContent,
   ],
 });
+
+
+(async () => {
+  try {
+    await initDb();
+    console.log('Base de datos inicializada.');
+  } catch (error) {
+    console.error('Error al inicializar la base de datos:', error);
+  }
+})();
 
 // Evento: Bot listo
 client.once('ready', () => {
